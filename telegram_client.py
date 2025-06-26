@@ -5,7 +5,6 @@ from parsers import get_parser_for
 
 client = TelegramClient(TELEGRAM_SESSION, TELEGRAM_API_ID, TELEGRAM_API_HASH)
 
-
 async def fetch_last_messages(channel_username, limit=10):
     messages = []
     async for msg in client.iter_messages(channel_username, limit=limit):
