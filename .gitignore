@@ -81,3 +81,5 @@ images/
 output/
 
 *.session
+
+db.sqlite3

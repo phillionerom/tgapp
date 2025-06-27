@@ -37,7 +37,10 @@ class BaseParser(ABC):
         exists = message_exists(message.id, channel)
         
         if exists:
-            print(f"🌬️ - Skipping message id {message.id} from `{channel}`. Already exists...")
+            print(f"⏩ - Skipping message id {message.id} from `{channel}`. Already exists...")
         
         return exists
     
+    def logParseStart(self, message, channel):
+        print(f"\n----------------------------------------------------------------------\n")
+        print(f"📟 Starting to parse new message in `{channel}`... Message id={message.id}")

@@ -33,6 +33,8 @@ class LiquidacionesParser(BaseParser):
         text = message.text.strip()
         if "€" not in text:
             return None  # Not a deal post
+        
+        self.logParseStart(message, self.channel)
 
         product_short_url = extract_first_url(text)
         product_source_url = resolve_redirect_url(product_short_url)
