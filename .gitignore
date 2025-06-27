@@ -80,3 +80,4 @@ images/
 # Ignorar carpeta output
 output/
 
+*.session
