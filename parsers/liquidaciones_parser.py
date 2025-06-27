@@ -4,6 +4,7 @@ import amazon_service
 
 from telethon.types import Message
 
+from db.db import message_exists
 from .base_parser import BaseParser
 from .utils import (
     extract_first_url, 
@@ -18,6 +19,9 @@ class LiquidacionesParser(BaseParser):
     channel = "liquidaciones"
 
     async def parse(self, message: Message, client=None) -> dict | None:
+        if self.skipMessage(message, self.channel):
+            return None
+
         if not message.text:
             return None
         
@@ -32,14 +36,6 @@ class LiquidacionesParser(BaseParser):
 
         product_short_url = extract_first_url(text)
         product_source_url = resolve_redirect_url(product_short_url)
-
-        # Download image if available in channel message
-        #image_path = None
-        #print(f"message photo={message.photo}")
-        #print(f"message entero={message}")
-        # if client and message.photo:
-        #     os.makedirs("images", exist_ok=True)
-        #     image_path = await client.download_media(message.photo, file=f"images/{message.id}.jpg")
 
         vendor_product = None
 
@@ -59,8 +55,8 @@ class LiquidacionesParser(BaseParser):
         generated_image = self.generateProductImage(message.id, ai_data, vendor, vendor_product['product_image'])
 
         return {
-            "id": message.id,
-            "date": str(message.date),
+            "message_id": message.id,
+            "date": message.date,
             "channel": self.channel,
             "title": ai_data['title'], 
             "content": ai_data['description'],

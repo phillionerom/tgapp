@@ -1,8 +1,9 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, exists
-from models import Base, ParsedMessage
-from config import DATABASE_URL
 from datetime import datetime, timedelta
+
+from config import DATABASE_URL
+from db.models import Base, ParsedMessage
 
 engine = create_engine(DATABASE_URL, echo=False)
 Session = sessionmaker(bind=engine)
@@ -45,6 +46,7 @@ def save_message(data):
             )
             session.add(msg)
             session.commit()
+            
     finally:
         session.close()
 

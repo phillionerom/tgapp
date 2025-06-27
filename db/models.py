@@ -28,6 +28,8 @@ class ParsedMessage(Base):
     category = Column(String)
     posted = Column(Boolean, default=False)
 
+    publications = relationship("Publication", back_populates="message")
+
 class Publication(Base):
     __tablename__ = 'publications'
 
@@ -36,4 +38,4 @@ class Publication(Base):
     channel = Column(String)
     published_at = Column(DateTime, default=func.now())
 
-    message = relationship("Message", back_populates="published")
+    message = relationship("ParsedMessage", back_populates="publications")

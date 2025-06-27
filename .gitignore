@@ -74,3 +74,9 @@ Desktop.ini
 # Config file (personal or sensitive)
 config.py
 
+# Ignorar carpeta images y todo su contenido
+images/
+
+# Ignorar carpeta output
+output/
+

@@ -1,4 +1,4 @@
-from telegram_client import start_client
+from consumer.telegram_client import start_client
 
 # Telegram @usernames or channel IDs
 CHANNELS = ["liquidaciones"]

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from telethon.types import Message
 
 from image_generator import generate_product_image
+from db.db import message_exists
 
 class BaseParser(ABC):
     channel: str  # each parser must define this
@@ -31,3 +32,12 @@ class BaseParser(ABC):
             old_price=f"{data['old_price']}", # de momento guardo sólo el old_price, poner descuento o calcularlo
             vendor=vendor
         )
+    
+    def skipMessage(self, message, channel):
+        exists = message_exists(message.id, channel)
+        
+        if exists:
+            print(f"🌬️ - Skipping message id {message.id} from `{channel}`. Already exists...")
+        
+        return exists
+    

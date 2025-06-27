@@ -165,7 +165,7 @@ def generate_product_image(
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     base.convert("RGB").save(output_path, format="JPEG", quality=100)
 
-    print(f"✅ Image saved to {output_path}")
+    print(f"🖼️ Image saved to {output_path}\n")
 
     return output_path
 
