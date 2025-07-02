@@ -12,7 +12,7 @@ async def get_product(message_id, channel, source_url):
     vendor_product = await get_amazon_product_data(source_url)
 
     if vendor_product['ok']:
-        print(f"amz img path={vendor_product['image_url']}")
+        #print(f"amz img path={vendor_product['image_url']}")
         print(f"amz current_price={vendor_product['current_price']}")
         print(f"amz original_price={vendor_product['original_price']}")
         print(f"amz savings_percent={vendor_product['savings_percent']}")

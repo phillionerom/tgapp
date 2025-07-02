@@ -6,8 +6,10 @@ from parsers.parser_loader import get_parser_for
 
 client = TelegramClient(TELEGRAM_SESSION, TELEGRAM_API_ID, TELEGRAM_API_HASH)
 
+DEFAULT_FETCH_LIMIT = 20 # Previous messages to fetch when process starts
 
-async def fetch_last_messages(channel_username, limit=15):
+
+async def fetch_last_messages(channel_username, limit=DEFAULT_FETCH_LIMIT):
     messages = []
     async for msg in client.iter_messages(channel_username, limit=limit):
         messages.append(msg)
@@ -18,20 +20,40 @@ def listen_to_channel(channel_username, parser_func):
     async def handler(event):
         parsed = await parser_func.parse(event.message)
         if parsed:
-            save_message(parsed)
+            save_message(parsed.to_dict())
 
 async def init_all_channels(channels):
     for channel in channels:
         parser = get_parser_for(channel)
-        print(f"\n📥 >>> Fetching last messages from: {channel} \n")
-        messages = await fetch_last_messages(channel, limit=15)
-        for msg in reversed(messages):
-            parsed = await parser.parse(msg)
-            if parsed:
-                save_message(parsed)
+        if not parser:
+            print(f"⚠️ No parser found for channel: {channel}. Skipping.\n")
+            continue
 
-        # Register listener for future messages
-        listen_to_channel(channel, parser)
+        print(f"\n📥 >>> Fetching last messages from: {channel}\n")
+
+        try:
+            messages = await fetch_last_messages(channel)
+        except Exception as e:
+            print(f"[ERROR] Failed to fetch messages from {channel}: {e}")
+            continue
+
+        for msg in reversed(messages):
+            try:
+                parsed = await parser.parse(msg)
+                if parsed:
+                    save_message(parsed.to_dict())
+                    print(f"✅ Stored message {msg.id} from {channel}")
+                else:
+                    print(f"⏩ Skipped message {msg.id} (not relevant) in {channel}")
+            except Exception as e:
+                print(f"[ERROR] Failed to parse message {msg.id} in {channel}: {e}")
+
+        # Register listener
+        try:
+            listen_to_channel(channel, parser)
+            print(f"🎧 Listening to new messages in {channel}")
+        except Exception as e:
+            print(f"[ERROR] Could not start listener for {channel}: {e}")
 
 def start_client(channels):
     async def main():

@@ -1,7 +1,7 @@
 from consumer.telegram_client import start_client
 
 # Telegram @usernames or channel IDs
-CHANNELS = ["liquidaciones"]
+CHANNELS = ["liquidaciones", "chollacos"]
 
 
 if __name__ == "__main__":

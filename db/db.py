@@ -42,6 +42,7 @@ def save_message(data):
                 product_url=data.get("product_url"),
                 image=data.get("image"),
                 category=data.get("category"),
+                vendor=data.get("vendor"),
                 posted=False
             )
             session.add(msg)

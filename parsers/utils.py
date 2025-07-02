@@ -59,7 +59,12 @@ def detect_store_from_url(url: str) -> str | None:
         return 'aliexpress'
     elif 'miravia.' in netloc:
         return 'miravia'
+    elif 'carrefour.' in netloc:
+        return 'carrefour'
+    elif 'ebay.' in netloc:
+        return 'ebay'
     else:
+        print(f"- Unknown vendor found for url: {url}")
         return 'unknown'
     
 

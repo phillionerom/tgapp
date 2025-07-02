@@ -18,6 +18,9 @@ def generate_product_image(
     if product_image_path is None:
         product_image_path = 'assets/not-found-product.png'
 
+    if price is None:
+        price = "0,0"
+
     # Load background
     base = Image.open(base_path).convert("RGBA")
     draw = ImageDraw.Draw(base)
@@ -69,7 +72,7 @@ def generate_product_image(
     emoji_y = py_price + 10
     base.paste(emoji, (emoji_x, emoji_y), emoji)
 
-    if old_price not in [None, "", "None"]:
+    if old_price not in [None, "", "None", "0", "0.0", "0,0"]:
         # - Old Price
         # Precio anterior (más pequeño y tachado)
         old_price_text = f"Antes: {old_price} €"
@@ -173,5 +176,5 @@ def generate_product_image(
 def get_font_path():
     path = os.path.join("fonts", "Roboto-Bold.ttf")
     if not os.path.exists(path):
-        raise FileNotFoundError(f"⚠️ Fuente no encontrada en {path}")
+        raise FileNotFoundError(f"⚠️ Font not found in {path}")
     return path

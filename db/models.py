@@ -26,6 +26,7 @@ class ParsedMessage(Base):
     product_url = Column(String)
     image = Column(String)
     category = Column(String)
+    vendor = Column(String)
     posted = Column(Boolean, default=False)
 
     publications = relationship("Publication", back_populates="message")

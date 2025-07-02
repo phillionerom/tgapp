@@ -27,6 +27,7 @@ Puedes usar emojis si crees realmente que pueden mejorar la presentación y dar 
 
 Devuelve también el precio que se encuentra en el mensaje.
 Devuelve también el precio original en caso de que se encuentre en el mensaje. Si no, o tienes dudas, déjalo vacío.
+Para los precios devuelve sólo el importe, no incluyas la moneda.
 
 Si existe alguna información extra como la talla, el género o alguna información complementaria que puede ser importante conocer, puedes devolverlo también.
 
@@ -145,6 +146,6 @@ def extract_description_and_prices(text: str) -> dict:
 
     return {
         "description": description,
-        "current_price": price_now,
+        "current_price": 25.99 if price_now is None else price_now,
         "previous_price": 99.95 if price_before is None else price_before
     }
