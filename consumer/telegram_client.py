@@ -44,7 +44,7 @@ async def init_all_channels(channels):
                     save_message(parsed.to_dict())
                     print(f"✅ Stored message {msg.id} from {channel}")
                 else:
-                    print(f"⏩ Skipped message {msg.id} (not relevant) in {channel}")
+                    print(f"⏩ --- Skipped message {msg.id} (not relevant) in {channel}")
             except Exception as e:
                 print(f"[ERROR] Failed to parse message {msg.id} in {channel}: {e}")
 

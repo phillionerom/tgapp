@@ -10,6 +10,7 @@ from image_generator import generate_product_image
 from db.db import message_exists
 from parsers.parsed_result import ParsedResult
 from text_generation import generate
+from dtos import ProductVendorData
 
 from .utils import (
     extract_first_url, 
@@ -41,7 +42,7 @@ class BaseParser(ABC):
         
         # check offer is still alive
         if self.isOutOfStock(message.text):
-            print(f"Message seems is finished offer: {message.text}")
+            print(f"👎 Message seems is finished offer: {message.text} \n\n> Will ignore it...")
             return None
 
         text = message.text.strip()
@@ -53,7 +54,7 @@ class BaseParser(ABC):
         product_short_url = extract_first_url(text)
         product_source_url = resolve_redirect_url(product_short_url)
 
-        vendor_product = None
+        vendor_product: ProductVendorData = None
 
         vendor = detect_store_from_url(product_source_url)
 
@@ -74,7 +75,7 @@ class BaseParser(ABC):
         print(f"AI DATA={ai_data}")
         
         try:
-            generated_image = self.generateProductImage(message.id, ai_data, vendor, vendor_product['product_image'])
+            generated_image = self.generateProductImage(message.id, ai_data, vendor, vendor_product.image_url)
         except Exception as e:
             print(f"[ERROR] Failed to generate image: {e}")
             generated_image = None
@@ -86,15 +87,16 @@ class BaseParser(ABC):
             title=ai_data['title'], 
             content=ai_data['description'],
             more_info=ai_data['more_info'], 
-            offer_price=vendor_product['current_price'] if ai_data['price'] in [None, ''] else ai_data['price'],
-            normal_price=vendor_product['original_price'] if ai_data['old_price'] in [None, ''] else ai_data['old_price'],
-            savings_percent=vendor_product['savings_percent'],
+            offer_price=vendor_product.offer_price if ai_data['price'] in [None, ''] else ai_data['price'],
+            normal_price=vendor_product.normal_price if ai_data['old_price'] in [None, ''] else ai_data['old_price'],
+            savings_percent=vendor_product.savings_percent,
             message_url=f"https://t.me/{self.channel}/{message.id}",
             short_url=product_short_url,
-            product_code=vendor_product['product_code'],
-            product_url=vendor_product['my_product_url'],
-            image=generated_image if generated_image else vendor_product['image_url'], # fallback amz image
-            category=vendor_product['category'],
+            product_code=vendor_product.product_code,
+            product_url=vendor_product.product_url,
+            image=generated_image if generated_image else vendor_product.image_url, # fallback amz image
+            category=vendor_product.category,
+            coupon=ai_data['coupon'],
             vendor=vendor
         )
 
@@ -110,7 +112,7 @@ class BaseParser(ABC):
             vendor=vendor
         )
     
-    def validateVendorProduct(self, vendor_product, vendor):
+    def validateVendorProduct(self, vendor_product: ProductVendorData, vendor) -> ProductVendorData:
         if vendor_product is None:
             print(f"❗ Unable to get vendor product data from \"{vendor}\" product")
             return None
