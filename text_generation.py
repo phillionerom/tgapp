@@ -17,7 +17,7 @@ Contenido del producto:
 {content}
 
 Escribe un título breve y atractivo para este producto (máximo 10 palabras).
-Luego, redacta una descripción más larga (máximo 20 palabras) que explique lo que es, qué puntos de dolor resuelve y por qué lo necesitaría.
+Luego, redacta una descripción más larga (máximo 30 palabras) que explique lo que es, qué puntos de dolor resuelve y por qué lo necesitaría.
 Tanto el título como la descripción que sean atractivos para hacer ver a la persona que lo lee que es una gran oferta. 
 Si el producto tiene tallas, o es una talla concreta, indícalo en la descripción.
 Utiliza sesgos psicológicos de ventas y técnicas de neuromarketing.
@@ -29,14 +29,25 @@ Devuelve también el precio que se encuentra en el mensaje.
 Devuelve también el precio original en caso de que se encuentre en el mensaje. Si no, o tienes dudas, déjalo vacío.
 Para los precios devuelve sólo el importe, no incluyas la moneda.
 
-Si existe alguna información extra como la talla, el género o alguna información complementaria que puede ser importante conocer, puedes devolverlo también.
+Si existe alguna información extra como la talla, el género o alguna información complementaria que puede ser importante conocer, puedes devolverlo también, 
+siempre y cuando no aparezca ya esa información en el título o en la descripción que vas a generar, o sea el propio enlace del producto.
+En caso de que no consideres nada que cumpla las premisas anteriores, NO ES NECESARIO devolver nada en ese campo. Omite la información irrelevante.
+No generes ningún valor por defecto indeterminado tipo: N/A o cosas así, en tal caso, déjalo en blanco.
+
+Si indica la existencia de algún cupón para obtener un mejor precio, devuelve ese código de cupón en la respuesta.
+
+Si en el mensaje encuentras más de un producto, devuelve sólo la información para el primer producto que hayas encontrado. Omite toda información
+perteneciente o relativa a los productos posteriores al primero que encuentres en el mensaje, ten esto muy en cuenta.
+
+MUY IMPORTANTE: Omite toda mención al canal de origen del mensaje, sólo queremos información relevante al propio producto.
 
 Formato:
 _title: <aquí el título>
 _description: <aquí la descripción>
 _price: <aquí el precio>
 _old_price: <aquí el precio original>
-_more_info: <aquí la información extra, si la hay, si no, vacío>
+_more_info: <aquí la información extra, excepto de cupones, si la hay, si no, vacío>
+_coupon: <aquí el código del cupón, si lo tiene, si no, vacío>
 """
 
     try:
@@ -49,58 +60,53 @@ _more_info: <aquí la información extra, si la hay, si no, vacío>
         text = response.choices[0].message.content
         print(f"generated text={response.choices[0].message.content}")
 
-        # lines = text.strip().split("\n")
-        # title = next((line.replace("_title:", "").strip() for line in lines if line.startswith("_title:")), "")
-        # description = next((line.replace("_description:", "").strip() for line in lines if line.startswith("_description:")), "")
-        # price = next((line.replace("_price:", "").strip() for line in lines if line.startswith("_price:")), "")
-
         lines = text.strip().splitlines()
-        title = ""
-        description = ""
-        price = ""
-        old_price = None
-        more_info = None
+
+        field_map = {
+            "_title:": "title",
+            "_description:": "description",
+            "_price:": "price",
+            "_old_price:": "old_price",
+            "_more_info:": "more_info",
+            "_coupon:": "coupon"
+        }
+
+        data = {
+            "title": "",
+            "description": "",
+            "price": "",
+            "old_price": "",
+            "more_info": "",
+            "coupon": ""
+        }
 
         i = 0
         while i < len(lines):
             line = lines[i].strip()
-            if line.startswith("_title:"):
-                title = line.replace("_title:", "").strip()
-                if not title and i + 1 < len(lines):
-                    title = lines[i + 1].strip()
-                    i += 1
-            elif line.startswith("_description:"):
-                description = line.replace("_description:", "").strip()
-                if not description and i + 1 < len(lines):
-                    description = lines[i + 1].strip()
-                    i += 1
-            elif line.startswith("_price:"):
-                price = line.replace("_price:", "").strip()
-                if not price and i + 1 < len(lines):
-                    price = lines[i + 1].strip()
-                    i += 1
-            elif line.startswith("_old_price:"):
-                old_price = line.replace("_old_price:", "").strip()
-                if not old_price and i + 1 < len(lines):
-                    old_price = lines[i + 1].strip()
-                    i += 1
-            elif line.startswith("_more_info:"):
-                more_info = line.replace("_more_info:", "").strip()
-                if not more_info and i + 1 < len(lines):
-                    more_info = lines[i + 1].strip()
-                    i += 1
+            for key, field in field_map.items():
+                if line.startswith(key):
+                    value = line[len(key):].strip()
+                    # Evitar que se tome otra cabecera como valor accidental
+                    if not value and (i + 1) < len(lines):
+                        next_line = lines[i + 1].strip()
+                        if not any(next_line.startswith(k) for k in field_map):
+                            value = next_line
+                            i += 1
+                    data[field] = value
+                    break
             i += 1
 
         return {
-            "title": title,
-            "description": description,
-            "price": price,
-            "old_price": old_price,
-            "more_info": more_info
+            "title": data["title"],
+            "description": data["description"],
+            "price": safe_parse_float(data["price"]),
+            "old_price": safe_parse_float(data["old_price"]),
+            "more_info": data["more_info"] or None,
+            "coupon": data["coupon"] or None
         }
     except Exception as e:
         print(f"❌ Error generating text with OpenAI: {e}")
-        return {"title": "", "description": "", "price": ""}
+        return None
     
 
 def test_generate(content: str) -> dict:
@@ -115,9 +121,10 @@ def test_generate(content: str) -> dict:
     return {
         "title": "Artículo en Venta. OFERTÓN!!!",
         "description": extracted['description'],
-        "price": extracted['current_price'],
-        "old_price": extracted['previous_price'],
-        "more_info": "Unisex, talla XL"
+        "price": safe_parse_float(extracted['current_price']),
+        "old_price": safe_parse_float(extracted['previous_price']),
+        "more_info": "Unisex, talla XL",
+        "coupon": "X123ABC"
     }
 
 # This method should go in every parser, just to fit the message structure
@@ -149,3 +156,13 @@ def extract_description_and_prices(text: str) -> dict:
         "current_price": 25.99 if price_now is None else price_now,
         "previous_price": 99.95 if price_before is None else price_before
     }
+
+def safe_parse_float(value: str | None) -> float | None:
+    if value is None:
+        return None
+    try:
+        # Elimina símbolos de moneda y cambia la coma por punto decimal
+        cleaned = value.replace("€", "").replace(",", ".").strip()
+        return float(cleaned)
+    except (ValueError, TypeError):
+        return None
