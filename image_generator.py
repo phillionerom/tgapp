@@ -154,6 +154,17 @@ def generate_product_image(
         ly = 0  # arriba del todo
 
         base.paste(logo, (lx, ly), logo)  # mantiene transparencia
+    elif vendor == 'aliexpress':
+        logo = Image.open("assets/aliexpress-logo-tr.png").convert("RGBA")
+        target_size = (120, 80)
+        logo = logo.resize(target_size, resample=Image.LANCZOS) 
+
+        # Position: top-right, sin margen superior
+        padding_right = 33
+        lx = base.width - logo.width - padding_right
+        ly = 0  # arriba del todo
+
+        base.paste(logo, (lx, ly), logo)  # mantiene transparencia
 
     # Channel logo
     logo = Image.open("assets/DonOferton-circle-logo.png").convert("RGBA")
