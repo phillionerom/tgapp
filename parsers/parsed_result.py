@@ -20,6 +20,7 @@ class ParsedResult:
     image: Optional[str]
     category: Optional[str]
     vendor: Optional[str]
+    coupon: Optional[str]
 
     def to_dict(self) -> dict:
         return self.__dict__

@@ -20,6 +20,7 @@ class ParsedMessage(Base):
     offer_price = Column(Float)
     normal_price = Column(Float)
     savings_percent = Column(Float)
+    coupon = Column(String)
     message_url = Column(String)
     short_url = Column(String)
     product_code = Column(String)

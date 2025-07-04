@@ -15,6 +15,7 @@ def build_promotional_message(data: dict) -> str:
     savings = data.get("savings_percent")
     url = data.get("product_url", "")
     category = data.get("category", "")
+    coupon = data.get("coupon", "")
 
     message = f"""
 <b>🛍 {title}</b>
@@ -31,13 +32,16 @@ def build_promotional_message(data: dict) -> str:
         message += f"""
 #{category}
 """
+    
+    if normal_price:
+        message += f"<b>❌ Antes:</b> {normal_price}€\n"
 
     message += f"""
 <b>💸 Nuevo Precio:</b> {offer_price}€
 """
-    
-    if normal_price:
-        message += f"<b>❌ Antes:</b> {normal_price}€\n"
+
+    if coupon:
+        message += f"<b><u>🏷️ CUPÓN:</u></b> {coupon}€\n"
 
     if savings:
         message += f"<b>🔥 Ahorra:</b> {savings}%\n"

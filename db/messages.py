@@ -24,6 +24,7 @@ class ParsedMessage(Base):
     offer_price = Column(Float)
     normal_price = Column(Float)
     savings_percent = Column(Float)
+    coupon = Column(String)
     message_url = Column(String)
     short_url = Column(String)
     product_code = Column(String)
@@ -55,6 +56,7 @@ def save_parsed_message(data: dict):
             offer_price=data["offer_price"],
             normal_price=data["normal_price"],
             savings_percent=data["savings_percent"],
+            coupon=data["coupon"],
             message_url=data["message_url"],
             short_url=data["short_url"],
             product_code=data["product_code"],
@@ -64,10 +66,10 @@ def save_parsed_message(data: dict):
         )
         session.add(msg)
         session.commit()
-        print("✅ Mensaje guardado en base de datos")
+        print("✅ Parsed message stored in db successfully")
         return True
     except Exception as e:
-        print(f"❌ Error guardando mensaje: {e}")
+        print(f"❌ Error while storing message in db: {e}")
         session.rollback()
         return False
     finally:
