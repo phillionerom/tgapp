@@ -13,26 +13,52 @@ from aliexpress_sdk import AliExpressSDK
 from config import ALIEXPRESS_APP_KEY, ALIEXPRESS_APP_SECRET, ALIEXPRESS_TRACKING_ID
 from parsers.utils import download_image_from_url
 from dtos import ProductVendorData
+from decorators import rate_limited_with_retries
 
 aliexpress = AliExpressSDK(ALIEXPRESS_APP_KEY, ALIEXPRESS_APP_SECRET, ALIEXPRESS_TRACKING_ID)
 
 
+@rate_limited_with_retries(min_interval_seconds=1, max_retries=3)
 async def get_product(message_id, channel, product_url) -> ProductVendorData:
     final_url = await resolve_aliexpress_redirect(product_url)
-    print(f"ALI resolved url={final_url}")
 
     clean_url = aliexpress.clean_url(final_url)
 
-    #aff_link = aliexpress.generate_affiliate_link(clean_url)
-
-    #print("AliExpress AFF LINK =", aff_link)
-    #print("AliExpress CLEAN URL =", clean_url)
-
     product = await get_aliexpress_product_info(message_id, channel, clean_url)
+    product.product_url = generate_affiliate_link(clean_url)
 
     return product
 
+# https://openservice.aliexpress.com/doc/api.htm#/api?cid=21407&path=aliexpress.affiliate.link.generate&methodType=GET/POST
+@rate_limited_with_retries(min_interval_seconds=1, max_retries=3)
+def generate_affiliate_link(clean_url):
+    method = "aliexpress.affiliate.link.generate"
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
+    params = {
+        "method": method,
+        "app_key": ALIEXPRESS_APP_KEY,
+        "timestamp": timestamp,
+        "format": "json",
+        "v": "2.0",
+        "sign_method": "md5",
+        "tracking_id": ALIEXPRESS_TRACKING_ID,
+        "source_values": clean_url.strip(),
+        "promotion_link_type": "0" # 0 for normal link, 2 for hot link which has not product commission
+    }
+
+    params["sign"] = generate_sign(params, ALIEXPRESS_APP_SECRET)
+
+    response = requests.post("https://api-sg.aliexpress.com/sync", data=params)
+    data = response.json()
+    try:
+        links = data["aliexpress_affiliate_link_generate_response"]["resp_result"]["result"]["promotion_links"]["promotion_link"]
+        promotion_link = links[0]["promotion_link"]
+        return promotion_link
+    except Exception as e:
+        print(f"[❌] Error parsing affiliate link: {e}")
+        print("[📦] Full response:", data)
+        return None
 
 async def get_aliexpress_product_info(message_id, channel: str, url: str) -> ProductVendorData | None:
     product_id = extract_product_id(url)
