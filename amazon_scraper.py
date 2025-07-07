@@ -74,7 +74,7 @@ async def get_amazon_main_image(product_url: str) -> str | None:
 def parse_price(price_str):
     if not price_str:
         return None
-    price_str = price_str.replace(".", "").replace(",", ".")
+    price_str = str(price_str).replace(".", "").replace(",", ".")
     match = re.search(r"\d+(\.\d+)?", price_str)
     return float(match.group(0)) if match else None
 
