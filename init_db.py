@@ -1,5 +1,5 @@
-from db.session import Base, engine
-from db.messages import ParsedMessage
+from OLD.session import Base, engine
+from OLD.messages import ParsedMessage
 
 def init():
     print("🧱 Creating tables...")

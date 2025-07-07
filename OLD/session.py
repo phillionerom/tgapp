@@ -10,7 +10,7 @@ Base = declarative_base()
 
 # Función para obtener mensajes no publicados
 def get_unposted_messages(limit=10):
-    from db.messages import ParsedMessage  # importar aquí para evitar ciclos
+    from OLD.messages import ParsedMessage  # importar aquí para evitar ciclos
     db = SessionLocal()
     try:
         return db.query(ParsedMessage).filter_by(posted=False).limit(limit).all()
@@ -19,7 +19,7 @@ def get_unposted_messages(limit=10):
 
 # Función para marcar como publicado
 def mark_as_posted(message_id: int, channel: str):
-    from db.messages import ParsedMessage
+    from OLD.messages import ParsedMessage
     db = SessionLocal()
     try:
         msg = db.query(ParsedMessage).filter_by(message_id=message_id, channel=channel).first()

@@ -1,14 +1,14 @@
 import json
 from pathlib import Path
 
-from db.messages import save_parsed_message
+from db.db import save_message as save_message_db
 
 from config import STORE_DATA
 
 
 def save_message(new_msg: dict):
     if STORE_DATA == "DB":
-        return save_parsed_message(new_msg)
+        return save_message_db(new_msg)
     elif STORE_DATA == "FILE":
         return save_message_file(new_msg)
     

@@ -4,9 +4,9 @@ import asyncio
 from telethon import TelegramClient
 from telethon.errors import FloodWaitError
 
-from storage import save_message
-from realtime_listener import start_listening
-from sender import send_to_channel
+from db.storage import save_message
+from OLD.realtime_listener import start_listening
+from OLD.sender import send_to_channel
 
 from config import TELEGRAM_API_ID, TELEGRAM_API_HASH
 

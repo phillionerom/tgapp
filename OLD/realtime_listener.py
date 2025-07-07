@@ -1,6 +1,6 @@
 from telethon import events
 
-from storage import save_message
+from db.storage import save_message
 
 from parsers.registry import load_parsers
 PARSERS = load_parsers()
