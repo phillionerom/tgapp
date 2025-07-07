@@ -23,7 +23,6 @@ Si el producto tiene tallas, o es una talla concreta, indícalo en la descripci�
 Utiliza sesgos psicológicos de ventas y técnicas de neuromarketing.
 No repitas el mismo texto en ambos campos. Si no tienes claro el tipo de artículo o producto que es, no inventes, que el título y la descripción entonces 
 sean genéricos, que no de pie a confusión, simplemente puedes decir que es una gran oferta, limitada y da sensación de urgencia.
-Puedes usar emojis si crees realmente que pueden mejorar la presentación y dar claridad a la oferta.
 
 Devuelve también el precio que se encuentra en el mensaje.
 Devuelve también el precio original en caso de que se encuentre en el mensaje. Si no, o tienes dudas, déjalo vacío.
@@ -157,12 +156,14 @@ def extract_description_and_prices(text: str) -> dict:
         "previous_price": 99.95 if price_before is None else price_before
     }
 
-def safe_parse_float(value: str | None) -> float | None:
+def safe_parse_float(value: str | float | None) -> float | None:
     if value is None:
         return None
+    if isinstance(value, float):
+        return value
     try:
         # Elimina símbolos de moneda y cambia la coma por punto decimal
         cleaned = value.replace("€", "").replace(",", ".").strip()
         return float(cleaned)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, AttributeError):
         return None
