@@ -9,11 +9,11 @@ from urllib.parse import urlencode
 import argparse
 
 from config import META_ACCESS_TOKEN, IG_USER_ID
+from utils.ngrok_utils import start_ngrok_if_needed, get_active_ngrok_tunnel
 
 # CONFIG — reemplaza con tus valores reales
 PUBLIC_DIR = "output/pub/ig"
 PORT = 8081
-NGROK_API = "http://localhost:4040/api/tunnels"
 
 
 def start_local_server():
@@ -21,25 +21,6 @@ def start_local_server():
     server = HTTPServer(("", PORT), SimpleHTTPRequestHandler)
     print(f"🌍 Serving local files at http://localhost:{PORT}/")
     server.serve_forever()
-
-
-def start_ngrok():
-    print("🚀 Starting ngrok tunnel...")
-    subprocess.Popen(["ngrok", "http", str(PORT)], stdout=subprocess.DEVNULL)
-    time.sleep(2)
-
-
-def get_ngrok_url():
-    for _ in range(10):
-        try:
-            tunnels = requests.get(NGROK_API).json()
-            for tunnel in tunnels["tunnels"]:
-                if tunnel["proto"] == "https":
-                    return tunnel["public_url"]
-        except:
-            time.sleep(1)
-    return None
-
 
 def prepare_image(image_path: str) -> str:
     os.makedirs(PUBLIC_DIR, exist_ok=True)
@@ -87,8 +68,8 @@ def main():
 
     filename = prepare_image(args.image)
     Thread(target=start_local_server, daemon=True).start()
-    start_ngrok()
-    public_url = get_ngrok_url()
+    start_ngrok_if_needed()
+    public_url = get_active_ngrok_tunnel()
 
     if not public_url:
         print("❌ Failed to retrieve ngrok URL.")
