@@ -85,3 +85,5 @@ output/
 *.session
 
 db.sqlite3
+config.py
+anyara.session
