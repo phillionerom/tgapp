@@ -51,6 +51,54 @@ def build_telegram_message(data: dict) -> str:
     message += f"\n👉 <a href=\"{url}\">¡Lo quiero!</a>"
     return message.strip()
 
+def build_whatsapp_message(data: dict) -> str:
+    """
+    Construye un mensaje para WhatsApp con formato: negrita, emojis y texto plano.
+    """
+    title = data.get("title", "Oferta destacada")
+    description = data.get("content", "")
+    more_info = data.get("more_info", "")
+    offer_price = data.get("offer_price", "")
+    normal_price = data.get("normal_price", "")
+    savings = data.get("savings_percent")
+    url = data.get("product_url", "")
+    category = data.get("category", "")
+    coupon = data.get("coupon", "")
+
+    lines = [
+        f"*🛍 {title}*",
+        "",
+        f"{description}"
+    ]
+
+    if more_info:
+        lines.append("")
+        lines.append(f"ℹ️ {more_info}")
+
+    if category:
+        lines.append(f"#{category}")
+
+    if offer_price:
+        lines.append("")
+        lines.append(f"*💸 Nuevo Precio:* {offer_price}€")
+
+    if normal_price:
+        lines.append(f"❌ *Antes:* {normal_price}€")
+
+    if coupon:
+        lines.append("")
+        lines.append(f"🏷️ *CUPÓN:* `{coupon}`")  # monoespaciado para el código
+
+    if savings:
+        lines.append("")
+        lines.append(f"🔥 *Ahorro:* {savings}%")
+
+    if url:
+        lines.append("")
+        lines.append(f"👉 Compra aquí: {url}")
+
+    return "\n".join(lines).strip()
+
 def build_instagram_message(data: dict) -> str:
     """
     Construye un pie de foto para Instagram a partir del JSON generado por el parser.
@@ -84,9 +132,11 @@ def build_instagram_message(data: dict) -> str:
         lines.append(f"❌ Antes: {normal_price}€")
 
     if coupon:
+        lines.append("")
         lines.append(f"🏷️ CUPÓN: {coupon}")
 
     if savings:
+        lines.append("")
         lines.append(f"🔥 Ahorra: {savings}%")
 
     if url:

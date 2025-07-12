@@ -24,12 +24,6 @@ def init_local_server():
     
     return public_url
 
-def image_exists(relative_path: str) -> bool:
-    # Ruta absoluta basada en la ubicación del script que se está ejecutando
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    abs_path = os.path.join(base_dir, relative_path)
-    return os.path.exists(abs_path)
-
 def prepare_image_local(image_path: str) -> str:
     image_filename = os.path.basename(image_path)
     image_path = os.path.join("output", image_filename)

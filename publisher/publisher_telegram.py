@@ -58,10 +58,6 @@ async def publish(channel: str, message: dict) -> bool:
             image_path = os.path.join("output", image_filename)  # Único lugar donde se añade 'output'
             abs_image_path = os.path.abspath(image_path)
 
-            print(f"IMG TG image filename = {image_filename}")
-            print(f"IMG TG image path = {image_path}")
-            print(f"IMG TG abs image path = {abs_image_path}")
-
             if not os.path.exists(abs_image_path):
                 raise FileNotFoundError(f"[ERROR] Image does not exist: {abs_image_path}")
 
@@ -75,7 +71,6 @@ async def publish(channel: str, message: dict) -> bool:
                     return False
                 
                 try:
-                    print(f"open image {abs_image_path}")
                     with open(abs_image_path, "rb") as f:
                         photo_input = InputFile(f)
                         await bot.send_photo(
@@ -95,7 +90,7 @@ async def publish(channel: str, message: dict) -> bool:
                 parse_mode=ParseMode.HTML,
                 reply_markup=keyboard
             )
-        print("final") 
+        
         return True
 
     except TelegramError as e:

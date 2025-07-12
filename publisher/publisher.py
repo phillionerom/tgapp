@@ -7,6 +7,7 @@ from db.models import ParsedMessage
 from publisher.publisher_rules import get_publication_targets
 
 from publisher.publisher_telegram import publish as publish_telegram
+from publisher.publisher_whatsapp import publish as publish_whatsapp
 from publisher.publisher_instagram import publish as publish_instagram
 
 
@@ -19,36 +20,51 @@ async def publish_messages():
         for msg in messages:
             targets = get_publication_targets(msg["category"])
             telegram_channels = targets.get("telegram_channels", [])
+            whatsapp_chat_ids = targets.get("whatsapp_chat_ids", [])
             instagram_enabled = targets.get("instagram", False)
             facebook_enabled = targets.get("facebook", False)
             web_enabled = targets.get("web", False)
 
             success_count = 0
-            total_targets = len(telegram_channels) + instagram_enabled + facebook_enabled + web_enabled
+            total_targets = len(telegram_channels) + len(whatsapp_chat_ids) + instagram_enabled + facebook_enabled + web_enabled
 
             # Telegram
             for channel in telegram_channels:
                 delay = random.uniform(2, 5)
-                print(f"🕒 Waiting {delay:.2f}s before posting message {msg['id']} to {channel}")
+                print(f"🕒 [TG] Waiting {delay:.2f}s before posting message {msg['id']} to {channel}")
                 await asyncio.sleep(delay)
 
                 success = await publish_telegram(channel, msg)
                 if success:
-                    print(f"✅ Posted message {msg['id']} to {channel}\n")
+                    print(f"✅ [TG] Posted message {msg['id']} to {channel}\n")
                     success_count += 1
                 else:
-                    print(f"❌ Failed to post message {msg['id']} to {channel}\n")
+                    print(f"❌ [TG] Failed to post message {msg['id']} to {channel}\n")
+
+            # WhatsApp
+            for chat_id in whatsapp_chat_ids:
+                delay = random.uniform(2, 5)
+                print(f"🕒 [WA] Waiting {delay:.2f}s before posting message {msg['id']} to {chat_id}")
+                await asyncio.sleep(delay)
+
+                success = await publish_whatsapp(chat_id, msg)
+                if success:
+                    print(f"✅ [WA] Posted message {msg['id']} to {chat_id}\n")
+                    success_count += 1
+                else:
+                    print(f"❌ [WA] Failed to post message {msg['id']} to {chat_id}\n")
 
             if instagram_enabled:
-                print(f"\n📸 [Placeholder] Would post to Instagram: {msg['id']}")
                 delay = random.uniform(2, 5)
-                print(f"🕒 Waiting {delay:.2f}s before posting message {msg['id']} to Instagram")
+                print(f"🕒 [IG] Waiting {delay:.2f}s before posting message {msg['id']} to Instagram")
                 await asyncio.sleep(delay)
                 if publish_instagram(msg):
                     success_count += 1
+
             if facebook_enabled:
                 print(f"📘 [Placeholder] Would post to Facebook: {msg['id']}")
                 success_count += 1
+                
             if web_enabled:
                 print(f"🌐 [Placeholder] Would post to Web: {msg['id']}")
                 success_count += 1

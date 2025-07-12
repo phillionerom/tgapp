@@ -1,18 +1,21 @@
 PUBLICATION_GROUPS = {
     "moda_group": {
         "telegram_channels": ["DonModa"],
+        "whatsapp_chat_ids": [],
         "instagram": True,
         "facebook": False,
         "web": True
     },
     "tech_group": {
         "telegram_channels": ["DonElectronica"],
+        "whatsapp_chat_ids": [],
         "instagram": True,
         "facebook": True,
         "web": False
     },
     "default": {
         "telegram_channels": ["@D_o_n_OFERTON"],
+        "whatsapp_chat_ids": ["120363419707406919@newsletter"], # test channel
         "instagram": True,
         "facebook": False,
         "web": False
