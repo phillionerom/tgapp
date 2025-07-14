@@ -1,9 +1,9 @@
 import httpx
 
 from publisher.message_builder import build_whatsapp_message
+from config import WAHA_API_KEY
 
 SESSION = "default"
-CHAT_ID = "120363419707406919@newsletter"
 
 
 async def publish(chat_id: str, message: dict) -> bool:
@@ -12,7 +12,7 @@ async def publish(chat_id: str, message: dict) -> bool:
     url = "http://localhost:3000/api/sendText"
     headers = {
         "Content-Type": "application/json",
-        # "X-Api-Key": "yoursecretkey"
+        "X-Api-Key": WAHA_API_KEY
     }
     data = {
         "session": SESSION,
