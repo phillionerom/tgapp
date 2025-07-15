@@ -11,24 +11,18 @@ from playwright.async_api import async_playwright
 
 # Lista de proxies (formato: http://user:pass@ip:port o http://ip:port)
 PROXIES = [
-    "http://159.89.245.69:53971",
-    "http://13.38.66.165:3128",
-    "http://13.208.241.126:53233",
-    "http://51.81.245.3:17981",
-    "http://13.126.217.46:3128",
-    "http://38.250.126.201:999",
-    "http://23.237.210.82:80",
-    "http://195.158.8.123:3128",
-    "http://47.239.48.114:59394",
-    "http://157.245.124.217:53971",
-    "http://43.199.163.10:3128",
-    "http://27.79.235.153:16000",
-    "http://89.117.145.245:3128",
+    "http://57.129.81.201:8080",
     "http://38.147.98.190:8080",
-    "http://40.76.69.94:8080",
-    "http://64.83.246.99:5999",
+    "http://35.179.146.181:3128",
+    "http://38.250.126.201:999",
+    "http://85.206.93.105:8080",
     "http://200.174.198.86:8888",
-    "http://188.166.230.109:31028"
+    "http://47.89.159.212:1080",
+    "http://51.44.163.128:3128",
+    "http://42.96.16.176:1312",
+    "http://47.236.163.74:8080",
+    "http://23.237.210.82:80",
+    "http://43.216.143.123:9008"
 ]
 
 # Número máximo de reintentos por URL
@@ -165,7 +159,7 @@ async def get_amazon_product_data(product_url: str) -> dict:
 
                 await context.close()
                 await browser.close()
-                
+
                 return {
                     "ok": True,
                     "image_url": image_url,
