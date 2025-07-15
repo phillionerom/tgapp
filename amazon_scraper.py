@@ -91,7 +91,12 @@ async def get_amazon_product_data(product_url: str) -> dict:
                     browser_args["proxy"] = {"server": proxy}
 
                 browser = await p.chromium.launch(**browser_args)
-                page = await browser.new_page()
+                context = await browser.new_context(
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                    locale="es-ES",
+                    viewport={"width": 1280, "height": 800}
+                )
+                page = await context.new_page()
 
                 await asyncio.sleep(random.uniform(2, 5))  # pausa inicial aleatoria
 
@@ -158,7 +163,9 @@ async def get_amazon_product_data(product_url: str) -> dict:
                 category = await page.locator("#wayfinding-breadcrumbs_feature_div li a").first.text_content()
                 category = category.strip() if category else None
 
+                await context.close()
                 await browser.close()
+                
                 return {
                     "ok": True,
                     "image_url": image_url,
@@ -171,6 +178,13 @@ async def get_amazon_product_data(product_url: str) -> dict:
 
         except Exception as e:
             print(f"❌ Error attempt {attempt+1}: {e}")
+            try:
+                html = await page.content()
+                with open(f"error_attempt_{attempt+1}.html", "w", encoding="utf-8") as f:
+                    f.write(html)
+                print(f"📝 HTML guardado como error_attempt_{attempt+1}.html")
+            except Exception as inner:
+                print(f"⚠️ No se pudo capturar el HTML: {inner}")
             await asyncio.sleep(random.uniform(2, 4))
 
     return {
