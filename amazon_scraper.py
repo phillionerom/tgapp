@@ -78,7 +78,7 @@ async def get_amazon_product_data(product_url: str) -> dict:
                 }
 
                 if proxy:
-                    browser_args["proxy"] = {"server": newproxy}
+                    browser_args["proxy"] = newproxy
 
                 browser = await p.chromium.launch(**browser_args)
                 context = await browser.new_context(
