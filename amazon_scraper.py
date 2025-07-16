@@ -110,7 +110,7 @@ async def get_amazon_product_data(product_url: str) -> dict:
                 print(f"\n🕵️ Attempt {attempt+1} - Using proxy: {proxy or '(NO PROXY)'}\n")
                 await page.goto(product_url, timeout=60000)
                 #await page.wait_for_load_state("networkidle")
-                await page.wait_for_selector("#imgTagWrapperId img", timeout=10000)
+                await page.wait_for_selector("#imgTagWrapperId img", timeout=30000)
                 await asyncio.sleep(random.uniform(1, 3))  # comportamiento humano
 
                 # Imagen principal
