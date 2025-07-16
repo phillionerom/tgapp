@@ -75,13 +75,6 @@ def parse_price(price_str):
 async def get_amazon_product_data(product_url: str) -> dict:
     for attempt in range(MAX_RETRIES):
         use_proxy = attempt > 0  # Primer intento sin proxy
-        #proxy = random.choice(PROXIES) if use_proxy and PROXIES else None
-
-        #if use_proxy:
-        # if True:
-        #     proxy_url = random.choice(PROXIES)
-        #     proxy = parse_proxy_url(proxy_url)
-        #     browser_args["proxy"] = proxy
 
         try:
             async with async_playwright() as p:
@@ -92,9 +85,6 @@ async def get_amazon_product_data(product_url: str) -> dict:
                     proxy_url = random.choice(PROXIES)
                     proxy = parse_proxy_url(proxy_url)
                     browser_args["proxy"] = proxy
-
-                #if proxy:
-                #    browser_args["proxy"] = newproxy
 
                 print(f"Trying to get page: [{product_url}]")
                 print(f"Browser args will be: {browser_args}")
@@ -109,21 +99,21 @@ async def get_amazon_product_data(product_url: str) -> dict:
                 )
                 page = await context.new_page()
 
+                # Avoid to playwright to download images, since it is not needed, just the img.src
+                await page.route("**/*", lambda route, request: route.abort() if request.resource_type == "image" else route.continue_())
+
                 await asyncio.sleep(random.uniform(2, 5))  # pausa inicial aleatoria
 
                 print(f"\n🕵️ Attempt {attempt+1} - Using proxy: {proxy or '(NO PROXY)'}\n")
                 await page.goto(product_url, timeout=60000)
-                print(f"scr after goto")
                 #await page.wait_for_load_state("networkidle")
                 await page.wait_for_selector("#imgTagWrapperId img", timeout=10000)
-                print(f"scr wait for load state")
                 await asyncio.sleep(random.uniform(1, 3))  # comportamiento humano
-                print(f"scr sleep")
 
                 # Imagen principal
+                print(f"Reading product image...")
                 img = page.locator("#imgTagWrapperId img")
                 image_url = await img.get_attribute("src")
-                print(f"scr image url = {image_url}")
 
                 # Precio actual
                 price_selectors = [
@@ -142,7 +132,6 @@ async def get_amazon_product_data(product_url: str) -> dict:
                         if current_price:
                             break
 
-                print(f"scr current price = {current_price}")
                 # Precio original
                 original_price_selectors = [
                     "span.a-text-strike",
@@ -157,11 +146,11 @@ async def get_amazon_product_data(product_url: str) -> dict:
                         original_price = await element.nth(0).inner_text()
                         if original_price:
                             break
-                print(f"scr original price = {original_price}")
+                
                 # Parsear
                 current = parse_price(current_price)
                 original = parse_price(original_price)
-                print(f"scr current = {current} original={original}")
+                
                 if not current or not original:
                     html = await page.content()
                     prices = re.findall(r"\u20ac\s?(\d+[\.,]\d{2})", html)
@@ -180,11 +169,10 @@ async def get_amazon_product_data(product_url: str) -> dict:
                 category = await page.locator("#wayfinding-breadcrumbs_feature_div li a").first.text_content()
                 category = category.strip() if category else None
 
-                print(f"scr category = {category}")
-
-                html = await page.content()
-                with open(f"debug_attempt_{attempt+1}.html", "w", encoding="utf-8") as f:
-                    f.write(html)
+                # Debug purposes
+                #html = await page.content()
+                #with open(f"debug_attempt_{attempt+1}.html", "w", encoding="utf-8") as f:
+                #    f.write(html)
 
                 await context.close()
                 await browser.close()
