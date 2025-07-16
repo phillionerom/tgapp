@@ -3,6 +3,7 @@ import random
 import requests
 import asyncio
 
+from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 
@@ -11,7 +12,16 @@ from playwright.async_api import async_playwright
 
 # Lista de proxies (formato: http://user:pass@ip:port o http://ip:port)
 PROXIES = [
-    "http://brd-customer-hl_0dfcb399-zone-residential_proxy1-country-es:viyvj0uqlu65@brd.superproxy.io:33335"
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10001",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10002",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10003",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10004",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10005",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10006",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10007",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10008",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10009",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10010"
 ]
 
 # Número máximo de reintentos por URL
@@ -65,27 +75,37 @@ def parse_price(price_str):
 async def get_amazon_product_data(product_url: str) -> dict:
     for attempt in range(MAX_RETRIES):
         use_proxy = attempt > 0  # Primer intento sin proxy
-        proxy = random.choice(PROXIES) if use_proxy and PROXIES else None
+        #proxy = random.choice(PROXIES) if use_proxy and PROXIES else None
+
+        #if use_proxy:
+        # if True:
+        #     proxy_url = random.choice(PROXIES)
+        #     proxy = parse_proxy_url(proxy_url)
+        #     browser_args["proxy"] = proxy
 
         try:
             async with async_playwright() as p:
                 browser_args = {"headless": True}  # False: to debug
 
-                newproxy = {
-                    "server": "http://brd.superproxy.io:33335",
-                    "username": "brd-customer-hl_0dfcb399-zone-residential_proxy1-country-es",
-                    "password": "viyvj0uqlu65"
-                }
+                proxy = None
+                if use_proxy:
+                    proxy_url = random.choice(PROXIES)
+                    proxy = parse_proxy_url(proxy_url)
+                    browser_args["proxy"] = proxy
 
-                if proxy:
-                    browser_args["proxy"] = newproxy
+                #if proxy:
+                #    browser_args["proxy"] = newproxy
+
+                print(f"Trying to get page: [{product_url}]")
+                print(f"Browser args will be: {browser_args}")
+                print(f"I will use proxy: {proxy}")
 
                 browser = await p.chromium.launch(**browser_args)
                 context = await browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
                     locale="es-ES",
                     viewport={"width": 1280, "height": 800},
-                    ignore_https_errors=True
+                    #ignore_https_errors=True
                 )
                 page = await context.new_page()
 
@@ -93,12 +113,17 @@ async def get_amazon_product_data(product_url: str) -> dict:
 
                 print(f"\n🕵️ Attempt {attempt+1} - Using proxy: {proxy or '(NO PROXY)'}\n")
                 await page.goto(product_url, timeout=60000)
-                await page.wait_for_load_state("networkidle")
+                print(f"scr after goto")
+                #await page.wait_for_load_state("networkidle")
+                await page.wait_for_selector("#imgTagWrapperId img", timeout=10000)
+                print(f"scr wait for load state")
                 await asyncio.sleep(random.uniform(1, 3))  # comportamiento humano
+                print(f"scr sleep")
 
                 # Imagen principal
                 img = page.locator("#imgTagWrapperId img")
                 image_url = await img.get_attribute("src")
+                print(f"scr image url = {image_url}")
 
                 # Precio actual
                 price_selectors = [
@@ -117,6 +142,7 @@ async def get_amazon_product_data(product_url: str) -> dict:
                         if current_price:
                             break
 
+                print(f"scr current price = {current_price}")
                 # Precio original
                 original_price_selectors = [
                     "span.a-text-strike",
@@ -131,11 +157,11 @@ async def get_amazon_product_data(product_url: str) -> dict:
                         original_price = await element.nth(0).inner_text()
                         if original_price:
                             break
-
+                print(f"scr original price = {original_price}")
                 # Parsear
                 current = parse_price(current_price)
                 original = parse_price(original_price)
-
+                print(f"scr current = {current} original={original}")
                 if not current or not original:
                     html = await page.content()
                     prices = re.findall(r"\u20ac\s?(\d+[\.,]\d{2})", html)
@@ -153,6 +179,12 @@ async def get_amazon_product_data(product_url: str) -> dict:
                 # Categoría
                 category = await page.locator("#wayfinding-breadcrumbs_feature_div li a").first.text_content()
                 category = category.strip() if category else None
+
+                print(f"scr category = {category}")
+
+                html = await page.content()
+                with open(f"debug_attempt_{attempt+1}.html", "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 await context.close()
                 await browser.close()
@@ -186,4 +218,12 @@ async def get_amazon_product_data(product_url: str) -> dict:
         "savings_percent": None,
         "category": None,
         "proxy_used": None
+    }
+
+def parse_proxy_url(proxy_url: str) -> dict:
+    parsed = urlparse(proxy_url)
+    return {
+        "server": f"{parsed.scheme}://{parsed.hostname}:{parsed.port}",
+        "username": parsed.username,
+        "password": parsed.password
     }
