@@ -11,18 +11,7 @@ from playwright.async_api import async_playwright
 
 # Lista de proxies (formato: http://user:pass@ip:port o http://ip:port)
 PROXIES = [
-    "http://57.129.81.201:8080",
-    "http://38.147.98.190:8080",
-    "http://35.179.146.181:3128",
-    "http://38.250.126.201:999",
-    "http://85.206.93.105:8080",
-    "http://200.174.198.86:8888",
-    "http://47.89.159.212:1080",
-    "http://51.44.163.128:3128",
-    "http://42.96.16.176:1312",
-    "http://47.236.163.74:8080",
-    "http://23.237.210.82:80",
-    "http://43.216.143.123:9008"
+    "http://brd-customer-hl_0dfcb399-zone-residential_proxy1-country-es:viyvj0uqlu65@brd.superproxy.io:33335"
 ]
 
 # Número máximo de reintentos por URL

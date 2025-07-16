@@ -106,6 +106,10 @@ PROXIES = [
     "http://18.171.55.201:3128"
 ]
 
+PROXIES2 = [
+    "http://brd-customer-hl_0dfcb399-zone-residential_proxy1-country-es:viyvj0uqlu65@brd.superproxy.io:33335"
+]
+
 TEST_URL = "https://httpbin.org/ip"  # Servicio simple para testear IP
 TIMEOUT = 10
 
@@ -135,7 +139,7 @@ async def validate_proxies(proxies: List[str]) -> List[str]:
 
 
 if __name__ == "__main__":
-    valid = asyncio.run(validate_proxies(PROXIES))
+    valid = asyncio.run(validate_proxies(PROXIES2))
     print("\n✅ Proxies válidos:")
     for vp in valid:
         print(vp)
