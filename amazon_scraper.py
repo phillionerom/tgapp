@@ -100,7 +100,10 @@ async def get_amazon_product_data(product_url: str) -> dict:
                 page = await context.new_page()
 
                 # Avoid to playwright to download images, since it is not needed, just the img.src
-                await page.route("**/*", lambda route, request: route.abort() if request.resource_type == "image" else route.continue_())
+                await page.route("**/*", block_images)
+                # await page.route("**/*", lambda route, request: (
+                #     route.abort() if request.resource_type == "image" else route.continue_()
+                # ))
 
                 await asyncio.sleep(random.uniform(2, 5))  # pausa inicial aleatoria
 
@@ -215,3 +218,10 @@ def parse_proxy_url(proxy_url: str) -> dict:
         "username": parsed.username,
         "password": parsed.password
     }
+
+async def block_images(route, request):
+    if request.resource_type == "image":
+        print(f"🛑 Bloqueando imagen: {request.url}")
+        await route.abort()
+    else:
+        await route.continue_()
