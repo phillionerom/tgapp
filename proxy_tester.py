@@ -137,9 +137,26 @@ async def validate_proxies(proxies: List[str]) -> List[str]:
         valid_proxies = [proxy for proxy in results if proxy]
     return valid_proxies
 
+from playwright.async_api import async_playwright
+
+async def test_proxy():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(proxy={
+            "server": "http://brd.superproxy.io:33335",
+            "username": "brd-customer-hl_0dfcb399-zone-residential_proxy1-country-es",
+            "password": "viyvj0uqlu65"
+        })
+        context = await browser.new_context(ignore_https_errors=True)
+        page = await context.new_page()
+        await page.goto("https://api.myip.com")  # sitio para comprobar IP externa
+        print(await page.content())
+        await browser.close()
+
 
 if __name__ == "__main__":
-    valid = asyncio.run(validate_proxies(PROXIES2))
-    print("\n✅ Proxies válidos:")
-    for vp in valid:
-        print(vp)
+    asyncio.run(test_proxy())
+    
+    # valid = asyncio.run(validate_proxies(PROXIES2))
+    # print("\n✅ Proxies válidos:")
+    # for vp in valid:
+    #     print(vp)
