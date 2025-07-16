@@ -88,7 +88,6 @@ async def get_amazon_product_data(product_url: str) -> dict:
 
                 print(f"Trying to get page: [{product_url}]")
                 print(f"Browser args will be: {browser_args}")
-                print(f"I will use proxy: {proxy}")
 
                 browser = await p.chromium.launch(**browser_args)
                 context = await browser.new_context(
@@ -170,8 +169,21 @@ async def get_amazon_product_data(product_url: str) -> dict:
                     savings = round(100 * (original - current) / original, 2)
 
                 # Categoría
-                category = await page.locator("#wayfinding-breadcrumbs_feature_div li a").first.text_content()
-                category = category.strip() if category else None
+                category_selectors = [
+                    "#wayfinding-breadcrumbs_feature_div li a",
+                    "#desktop-breadcrumbs_feature_div li a"
+                ]
+                category = None
+
+                for sel in category_selectors:
+                    try:
+                        locator = page.locator(sel).first
+                        category = await locator.text_content(timeout=2000)
+                        if category:
+                            category = category.strip()
+                            break
+                    except Exception:
+                        continue
 
                 # Debug purposes
                 #html = await page.content()
