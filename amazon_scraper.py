@@ -84,7 +84,8 @@ async def get_amazon_product_data(product_url: str) -> dict:
                 context = await browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
                     locale="es-ES",
-                    viewport={"width": 1280, "height": 800}
+                    viewport={"width": 1280, "height": 800},
+                    ignore_https_errors=True
                 )
                 page = await context.new_page()
 
