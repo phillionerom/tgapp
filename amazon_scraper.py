@@ -70,8 +70,15 @@ async def get_amazon_product_data(product_url: str) -> dict:
         try:
             async with async_playwright() as p:
                 browser_args = {"headless": True}  # False: to debug
+
+                newproxy = {
+                    "server": "http://brd.superproxy.io:33335",
+                    "username": "brd-customer-hl_0dfcb399-zone-residential_proxy1-country-es",
+                    "password": "viyvj0uqlu65"
+                }
+
                 if proxy:
-                    browser_args["proxy"] = {"server": proxy}
+                    browser_args["proxy"] = {"server": newproxy}
 
                 browser = await p.chromium.launch(**browser_args)
                 context = await browser.new_context(
