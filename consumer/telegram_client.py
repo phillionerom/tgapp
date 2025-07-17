@@ -51,7 +51,8 @@ async def init_all_channels(channels):
         # Register listener
         try:
             listen_to_channel(channel, parser)
-            print(f"🎧 Listening to new messages in {channel}")
+            print(f"\n🎧 Listening to new messages in {channel}...")
+            print(f"________________________________________________")
         except Exception as e:
             print(f"[ERROR] Could not start listener for {channel}: {e}")
 

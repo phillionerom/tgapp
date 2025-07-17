@@ -58,6 +58,8 @@ class BaseParser(ABC):
 
         vendor = detect_store_from_url(product_source_url)
 
+        print(f"🌐 Trying to get product page: [{product_source_url}]")
+
         if vendor == 'amazon':
             vendor_product = await amazon_service.get_product(message.id, self.channel, product_source_url)
         elif vendor == 'aliexpress':
