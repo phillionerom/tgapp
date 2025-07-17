@@ -12,20 +12,17 @@ from playwright.async_api import async_playwright
 
 # Lista de proxies (formato: http://user:pass@ip:port o http://ip:port)
 PROXIES = [
-    "http://brd-customer-hl_0dfcb399-zone-residential_proxy1-country-es:viyvj0uqlu65@brd.superproxy.io:33335"
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10001",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10002",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10003",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10004",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10005",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10006",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10007",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10008",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10009",
+    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10010"
 ]
-# PROXIES = [
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10001",
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10002",
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10003",
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10004",
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10005",
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10006",
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10007",
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10008",
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10009",
-#     "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10010"
-# ]
 
 # Número máximo de reintentos por URL
 MAX_RETRIES = 3
