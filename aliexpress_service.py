@@ -96,8 +96,8 @@ async def get_aliexpress_product_info(message_id, channel: str, url: str) -> Pro
                 products = products_obj.get("product", [])
                 if products:
                     product = products[0]
-                    image = product.get("product_main_image_url", "")
-                    product_image = await download_image_from_url(image, f"images/aliexpress/{channel}-{message_id}_product.jpg")
+                    scraped_data = product.get("product_main_image_url", "")
+                    product_image = await download_image_from_url(scraped_data, f"images/aliexpress/{channel}-{message_id}_product.jpg")
                     #live_price = await get_live_price_from_promotion_link(product.get("promotion_link", ""))
                     #print(f"AE precio con PROMO = {live_price}")
                     return ProductVendorData(
@@ -117,20 +117,23 @@ async def get_aliexpress_product_info(message_id, channel: str, url: str) -> Pro
         print(f"[AliExpress API] ❌ Error during request: {e}")
 
     # Fallback: scrape HTML
-    print(f"Trying to download ALIEXPRESS img from={url}")
-    image = await get_product_data_from_html(url)
-    if image:
-        product_image = await download_image_from_url(image, f"images/aliexpress/{channel}-{message_id}_product.jpg")
-        return {
-            "product_image": product_image,
-            "title": "",  # You could scrape more fields if needed
-            "current_price": 0,
-            "category": "",
-            "original_price": 0,
-            "savings_percent": 0,
-            "my_product_url": url,
-            "product_code": product_id
-        }
+    print(f"\n- Trying to download ALIEXPRESS img from={url}")
+    scraped_data = await get_product_data_from_html(url)
+    print(f"-- Scraped data from ALIEXPRESS={scraped_data}")
+    if scraped_data:
+        product_image = await download_image_from_url(scraped_data['image_url'], f"images/aliexpress/{channel}-{message_id}_product.jpg")
+        print(f"--- Saved image from ALIEXPRESS to: {product_image}\n")
+        return ProductVendorData(
+                    product_code=product_id,
+                    product_url=url,
+                    title=scraped_data.get("title" ,""),  # You could scrape more fields if needed
+                    offer_price=scraped_data.get("current_price", 0),
+                    normal_price= scraped_data.get("original_price", 0),
+                    savings_percent=scraped_data.get("savings_percent", 0),  # puedes calcularlo si lo deseas
+                    category=scraped_data.get("main_category", ""),
+                    image_url=product_image,
+                    vendor='aliexpress'
+                )
 
     return None
 
@@ -190,16 +193,23 @@ def get_product_main_image(product_id: str, app_key: str, app_secret: str, track
 # move to aliexpress_scraper.py
 async def get_product_data_from_html(url: str) -> dict:
     try:
+        # simula un cliente sin soporte de imágenes
         headers = {
-            "User-Agent": "Mozilla/5.0"
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1"
         }
+
         async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.get(url, headers=headers)
             html = resp.text
 
         soup = BeautifulSoup(html, "html.parser")
 
-        # Extract product image
+        # === Extract image without downloading ===
         og_image = soup.find("meta", property="og:image")
         image_url = og_image["content"] if og_image else None
         if not image_url:
@@ -207,7 +217,7 @@ async def get_product_data_from_html(url: str) -> dict:
             if img_tag and img_tag.get("src"):
                 image_url = img_tag["src"]
 
-        # Extract main category
+        # === Main category ===
         breadcrumb_links = soup.find_all("a", href=True)
         categories = [
             a.text.strip()
@@ -216,19 +226,19 @@ async def get_product_data_from_html(url: str) -> dict:
         ]
         main_category = categories[0] if categories else None
 
-        # Extract title
+        # === Title ===
         title_tag = soup.find("meta", property="og:title")
         title = title_tag["content"].strip() if title_tag else None
 
-        # Extract current price
+        # === Current price ===
         current_price_tag = soup.select_one('[class*="product-price-current"]')
         current_price = current_price_tag.text.strip().replace("€", "").replace(",", ".") if current_price_tag else None
 
-        # Extract original/old price
+        # === Original price ===
         old_price_tag = soup.select_one('[class*="product-price-original"]')
         original_price = old_price_tag.text.strip().replace("€", "").replace(",", ".") if old_price_tag else None
 
-        # Calculate savings percent
+        # === Savings ===
         savings_percent = None
         try:
             if original_price and current_price:
@@ -248,7 +258,7 @@ async def get_product_data_from_html(url: str) -> dict:
         }
 
     except Exception as e:
-        print(f"[ERROR] Failed to get product info: {e}")
+        print(f"[ERROR] Failed to scrape product info: {e}")
         return {
             "image_url": None,
             "main_category": None,
