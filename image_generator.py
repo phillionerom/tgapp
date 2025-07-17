@@ -12,7 +12,7 @@ def generate_product_image(
     old_price: str,
     vendor: str
 ):
-    print("🔧 Generating product image...")
+    print("\n🔧 Generating product image...")
 
     # fallback
     if product_image_path is None:

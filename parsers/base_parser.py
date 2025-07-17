@@ -42,7 +42,7 @@ class BaseParser(ABC):
         
         # check offer is still alive
         if self.isOutOfStock(message.text):
-            print(f"👎 Message seems is finished offer: {message.text} \n\n> Will ignore it...")
+            print(f"\n👎 Message seems is finished offer:\n-------------------- {message.text} \n--------------------\n> Will ignore it...\n")
             return None
 
         text = message.text.strip()
