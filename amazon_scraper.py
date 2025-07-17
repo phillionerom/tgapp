@@ -78,7 +78,10 @@ async def get_amazon_product_data(product_url: str) -> dict:
 
         try:
             async with async_playwright() as p:
-                browser_args = {"headless": True}  # False: to debug
+                browser_args = {
+                    "headless": True,  # False: to debug
+                    "args": ["--blink-settings=imagesEnabled=false"] # https://peter.sh/experiments/chromium-command-line-switches/ disable images
+                }
 
                 proxy = None
                 if use_proxy:
@@ -95,6 +98,11 @@ async def get_amazon_product_data(product_url: str) -> dict:
                     viewport={"width": 1280, "height": 800},
                     ignore_https_errors=True
                 )
+
+                await context.set_extra_http_headers({
+                    "Accept": "text/html"
+                })
+                
                 page = await context.new_page()
 
                 # Avoid to playwright to download images, since it is not needed, just the img.src
@@ -236,6 +244,11 @@ blocked_types = {"image", "stylesheet", "font", "media", "other"}
 async def block_unneeded(route, request):
     if request.resource_type in blocked_types:
         #print(f"🛑 Bloqueada ({request.resource_type}): {request.url}")
+        await route.abort()
+    elif any(domain in request.url for domain in [
+        "media-amazon.com", "ssl-images-amazon.com"
+    ]):
+        print(f"⛔ BLOCKED domain: {request.url}")
         await route.abort()
     else:
         await route.continue_()
