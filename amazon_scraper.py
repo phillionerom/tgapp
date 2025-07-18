@@ -7,21 +7,17 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 
+from utils.net_utils import get_random_desktop_user_agent
+
 # Free proxies from free-proxy-list.net
 # Updated at 2025-06-25 14:52:03 UTC.
 
 # Lista de proxies (formato: http://user:pass@ip:port o http://ip:port)
 PROXIES = [
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10001",
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10002",
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10003",
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10004",
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10005",
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10006",
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10007",
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10008",
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10009",
-    "http://sphhlb7v4s:g=xt2k4VJWTh1sp6uy@es.decodo.com:10010"
+    "http://250718GJsc2-resi_region-ES_Andalusia_Cordoba:GrRSU1iB3dp6sRo@eu.proxy-jet.io:1010",
+    "http://250718GJsc2-resi_region-ES_Andalusia_Cordoba:GrRSU1iB3dp6sRo@eu.proxy-jet.io:1010",
+    "http://250718GJsc2-resi_region-ES_Andalusia_Cordoba:GrRSU1iB3dp6sRo@eu.proxy-jet.io:1010",
+    "http://250718GJsc2-resi_region-ES_Andalusia_Cordoba:GrRSU1iB3dp6sRo@eu.proxy-jet.io:1010"
 ]
 
 # Número máximo de reintentos por URL
@@ -93,7 +89,7 @@ async def get_amazon_product_data(product_url: str) -> dict:
 
                 browser = await p.chromium.launch(**browser_args)
                 context = await browser.new_context(
-                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                    user_agent=get_random_desktop_user_agent(),
                     locale="es-ES",
                     viewport={"width": 1280, "height": 800},
                     ignore_https_errors=True
@@ -102,7 +98,7 @@ async def get_amazon_product_data(product_url: str) -> dict:
                 await context.set_extra_http_headers({
                     "Accept": "text/html"
                 })
-                
+
                 page = await context.new_page()
 
                 # Avoid to playwright to download images, since it is not needed, just the img.src
@@ -248,7 +244,7 @@ async def block_unneeded(route, request):
     elif any(domain in request.url for domain in [
         "media-amazon.com", "ssl-images-amazon.com"
     ]):
-        print(f"⛔ BLOCKED domain: {request.url}")
+        #print(f"⛔ BLOCKED domain: {request.url}")
         await route.abort()
     else:
         await route.continue_()

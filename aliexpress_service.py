@@ -12,6 +12,7 @@ from aliexpress_sdk import AliExpressSDK
 
 from config import ALIEXPRESS_APP_KEY, ALIEXPRESS_APP_SECRET, ALIEXPRESS_TRACKING_ID
 from parsers.utils import download_image_from_url
+from utils.net_utils import get_random_desktop_user_agent
 from dtos import ProductVendorData
 from decorators import rate_limited_with_retries
 
@@ -195,7 +196,7 @@ async def get_product_data_from_html(url: str) -> dict:
     try:
         # simula un cliente sin soporte de imágenes
         headers = {
-            "User-Agent": "Mozilla/5.0",
+            "User-Agent": get_random_desktop_user_agent(),
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
